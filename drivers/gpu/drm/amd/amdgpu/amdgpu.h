@@ -50,7 +50,6 @@
 #include <linux/hashtable.h>
 #include <linux/dma-fence.h>
 #include <linux/pci.h>
-#include <linux/aer.h>
 
 #include <drm/ttm/ttm_bo_api.h>
 #include <drm/ttm/ttm_bo_driver.h>
@@ -243,6 +242,7 @@ extern int amdgpu_num_kcq;
 
 #define AMDGPU_VCNFW_LOG_SIZE (32 * 1024)
 extern int amdgpu_vcnfw_log;
+extern int amdgpu_sg_display;
 
 #define AMDGPU_VM_MAX_NUM_CTX			4096
 #define AMDGPU_SG_THRESHOLD			(256*1024*1024)
@@ -876,7 +876,7 @@ struct amdgpu_device {
 	struct amdgpu_vkms_output       *amdgpu_vkms_output;
 	struct amdgpu_mode_info		mode_info;
 	/* For pre-DCE11. DCE11 and later are in "struct amdgpu_device->dm" */
-	struct work_struct		hotplug_work;
+	struct delayed_work         hotplug_work;
 	struct amdgpu_irq_src		crtc_irq;
 	struct amdgpu_irq_src		vline0_irq;
 	struct amdgpu_irq_src		vupdate_irq;
@@ -1023,7 +1023,6 @@ struct amdgpu_device {
 	bool                            in_runpm;
 	bool                            has_pr3;
 
-	bool                            pm_sysfs_en;
 	bool                            ucode_sysfs_en;
 	bool                            psp_sysfs_en;
 
@@ -1113,18 +1112,14 @@ void amdgpu_mm_wreg8(struct amdgpu_device *adev, uint32_t offset, uint8_t value)
 uint8_t amdgpu_mm_rreg8(struct amdgpu_device *adev, uint32_t offset);
 
 u32 amdgpu_device_indirect_rreg(struct amdgpu_device *adev,
-				u32 pcie_index, u32 pcie_data,
 				u32 reg_addr);
 u64 amdgpu_device_indirect_rreg64(struct amdgpu_device *adev,
-				  u32 pcie_index, u32 pcie_data,
 				  u32 reg_addr);
 void amdgpu_device_indirect_wreg(struct amdgpu_device *adev,
-				 u32 pcie_index, u32 pcie_data,
 				 u32 reg_addr, u32 reg_data);
 void amdgpu_device_indirect_wreg64(struct amdgpu_device *adev,
-				   u32 pcie_index, u32 pcie_data,
 				   u32 reg_addr, u64 reg_data);
-
+u32 amdgpu_device_get_rev_id(struct amdgpu_device *adev);
 bool amdgpu_device_asic_has_dc_support(enum amd_asic_type asic_type);
 bool amdgpu_device_has_dc_support(struct amdgpu_device *adev);
 

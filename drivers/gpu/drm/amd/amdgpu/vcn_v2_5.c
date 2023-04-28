@@ -71,11 +71,12 @@ static int amdgpu_ih_clientid_vcns[] = {
 };
 
 /**
- * vcn_v2_5_early_init - set function pointers
+ * vcn_v2_5_early_init - set function pointers and load microcode
  *
  * @handle: amdgpu_device pointer
  *
  * Set ring and irq function pointers
+ * Load microcode from filesystem
  */
 static int vcn_v2_5_early_init(void *handle)
 {
@@ -107,7 +108,7 @@ static int vcn_v2_5_early_init(void *handle)
 	vcn_v2_5_set_irq_funcs(adev);
 	vcn_v2_5_set_ras_funcs(adev);
 
-	return 0;
+	return amdgpu_vcn_early_init(adev);
 }
 
 /**
@@ -223,6 +224,10 @@ static int vcn_v2_5_sw_init(void *handle)
 
 	if (adev->pg_flags & AMD_PG_SUPPORT_VCN_DPG)
 		adev->vcn.pause_dpg_mode = vcn_v2_5_pause_dpg_mode;
+
+	r = amdgpu_vcn_ras_sw_init(adev);
+	if (r)
+		return r;
 
 	return 0;
 }
@@ -2030,6 +2035,4 @@ static void vcn_v2_5_set_ras_funcs(struct amdgpu_device *adev)
 	default:
 		break;
 	}
-
-	amdgpu_vcn_set_ras_funcs(adev);
 }

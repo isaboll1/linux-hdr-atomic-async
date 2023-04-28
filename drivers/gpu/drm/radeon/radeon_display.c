@@ -1587,7 +1587,6 @@ int radeon_modeset_init(struct radeon_device *rdev)
 
 	if (radeon_use_pflipirq == 2 && rdev->family >= CHIP_R600)
 		rdev->ddev->mode_config.async_page_flip = true;
-	rdev->ddev->mode_config.atomic_async_page_flip_not_supported = true;
 
 	if (ASIC_IS_DCE5(rdev)) {
 		rdev->ddev->mode_config.max_width = 16384;
